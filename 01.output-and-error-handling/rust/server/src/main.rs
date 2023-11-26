@@ -4,17 +4,18 @@ use rand::Rng;
 
 #[get("/")]
 async fn handle_request() -> HttpResponse {
-    let random_number = rand::thread_rng().gen_range(0..10);
+    let mut rng = rand::thread_rng();
+    let random_number = rng.gen_range(0..10);
 
     match random_number {
         0..=2 => HttpResponse::Ok().body("Today it will b sunny!"),
         3..=4 => HttpResponse::Ok().body("I'd bring an umbrella, just in case..."),
         5 => {
-            let retry_after_seconds = rand::thread_rng().gen_range(1..=10);
+            let retry_after_seconds = rng.gen_range(1..=10);
             reject_as_too_busy(&retry_after_seconds.to_string())
         },
         6 => {
-            let retry_after_seconds = rand::thread_rng().gen_range(1..=10);
+            let retry_after_seconds = rng.gen_range(1..=10);
 
             let time_after_delay = Utc::now()+ Duration::seconds(retry_after_seconds);
             const RFC1123: &str = "%a, %d %b %Y %H:%M:%S %Z";
