@@ -35,16 +35,26 @@ func main() {
 		retryAfterHeader := response.Header.Get("Retry-After")
 		retryAfter, err := strconv.Atoi(retryAfterHeader)
 		if err != nil {
-			fmt.Printf("can't determine how long to sleep: %s\n", retryAfterHeader)
+			timeAfterDelay, err := time.Parse(http.TimeFormat, retryAfterHeader)
+			if err != nil {
+				fmt.Printf("can't determine how long to sleep: %s\n", retryAfterHeader)
+				return
+			}
+			retryAfter := timeAfterDelay.Sub(time.Now()).Seconds()
+			waitAndRetry(int(retryAfter))
 			return
 		}
 
-		if retryAfter < 5 {
-			fmt.Printf("try again after %s seconds...\n", retryAfterHeader)
-			time.Sleep(time.Duration(retryAfter) * time.Second)
-			fmt.Println("retry")
-		} else {
-			fmt.Printf("wait too long time(%d). can't get the weather.\n", retryAfter)
-		}
+		waitAndRetry(retryAfter)
+	}
+}
+
+func waitAndRetry(retryAfter int) {
+	if retryAfter < 5 {
+		fmt.Printf("try again after %d seconds...\n", retryAfter)
+		time.Sleep(time.Duration(retryAfter) * time.Second)
+		fmt.Println("retry")
+	} else {
+		fmt.Printf("wait too long time(%d seconds). can't get the weather.\n", retryAfter)
 	}
 }
