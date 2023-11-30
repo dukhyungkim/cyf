@@ -59,4 +59,5 @@ func printHelp(name string) {
 	fmt.Printf("usage: %s [file ...]\n", name)
 	fmt.Println("  Options:")
 	fmt.Println("  -h\t\tprint this message")
+	fmt.Println("  -n\t\tNumber the output lines, starting at 1")
 }
