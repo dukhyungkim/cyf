@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"slices"
@@ -16,17 +17,41 @@ func main() {
 		return
 	}
 
-	filename := os.Args[1]
-	file, err := os.ReadFile(filename)
-	if err != nil {
-		fmt.Println(err)
-		return
+	var files []string
+	printLineNum := false
+	for _, arg := range os.Args[1:] {
+		if arg == "-n" {
+			printLineNum = true
+			continue
+		}
+		if arg[0] == '-' {
+			continue
+		}
+		files = append(files, arg)
 	}
 
-	_, err = os.Stdout.Write(file)
-	if err != nil {
-		fmt.Println(err)
-		return
+	for _, file := range files {
+		contents, err := os.ReadFile(file)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		if printLineNum {
+			printWithLineNum(contents)
+			continue
+		}
+		fmt.Print(string(contents))
+	}
+}
+
+func printWithLineNum(contents []byte) {
+	lines := bytes.Split(contents, []byte("\n"))
+	for i, line := range lines {
+		fmt.Printf("%6d\t%s", i+1, string(line))
+		if i != len(lines)-1 {
+			fmt.Println()
+		}
 	}
 }
 
