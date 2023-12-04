@@ -34,21 +34,23 @@ func Execute() {
 		fmt.Println(readPath)
 		return
 	}
-	printDir(readPath, opts...)
-}
 
-func printDir(readPath string, opts ...string) {
 	entries, err := os.ReadDir(readPath)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	printDir(entries, opts...)
+}
+
+func printDir(entries []os.DirEntry, opts ...string) {
 	if len(opts) == 0 {
 		for _, entry := range entries {
 			fmt.Println(entry.Name())
 		}
 		return
 	}
+
 	switch opts[0] {
 	case "-m":
 		names := make([]string, len(entries))
