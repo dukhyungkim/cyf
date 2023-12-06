@@ -47,9 +47,10 @@ func main() {
 
 func printWithLineNum(contents []byte) {
 	lines := bytes.Split(contents, []byte("\n"))
+	last := len(lines) - 1
 	for i, line := range lines {
 		fmt.Printf("%6d\t%s", i+1, string(line))
-		if i != len(lines)-1 {
+		if i != last {
 			fmt.Println()
 		}
 	}
