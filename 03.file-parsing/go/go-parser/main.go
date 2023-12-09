@@ -17,29 +17,40 @@ type NameScore struct {
 type NameScoreReader func(file []byte) ([]NameScore, error)
 
 func main() {
+	err := runApp()
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func runApp() error {
 	assetDir := path.Clean("../../assets")
+
 	for filename, reader := range map[string]NameScoreReader{
 		"custom-binary-be.bin": parseBinary,
 		"custom-binary-le.bin": parseBinary,
 		"data.csv":             parseCSV,
 		"json.txt":             parseJSON,
+		"repeated-json.txt":    parseRepeatedJSON,
 	} {
 		filepath := path.Join(assetDir, filename)
 
 		file, err := os.ReadFile(filepath)
 		if err != nil {
-			log.Fatalln(err)
+			return err
 		}
 
 		nameScores, err := reader(file)
 		if err != nil {
-			log.Fatalln(err)
+			return err
 		}
 
 		fmt.Printf("read %s and results:\n", filename)
 		printResult(nameScores)
 		fmt.Println()
 	}
+
+	return nil
 }
 
 func printResult(nameScores []NameScore) {
