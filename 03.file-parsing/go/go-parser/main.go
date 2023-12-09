@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"fmt"
 	"log"
+	"os"
 	"path"
 	"slices"
 )
@@ -13,17 +14,24 @@ type NameScore struct {
 	HighScore int32  `json:"high_score"`
 }
 
-type NameScoreReader func(filepath string) ([]NameScore, error)
+type NameScoreReader func(file []byte) ([]NameScore, error)
 
 func main() {
 	assetDir := path.Clean("../../assets")
 	for filename, reader := range map[string]NameScoreReader{
-		"custom-binary-be.bin": readBinary,
-		"custom-binary-le.bin": readBinary,
-		"data.csv":             readCSV,
+		"custom-binary-be.bin": parseBinary,
+		"custom-binary-le.bin": parseBinary,
+		"data.csv":             parseCSV,
+		"json.txt":             parseJSON,
 	} {
 		filepath := path.Join(assetDir, filename)
-		nameScores, err := reader(filepath)
+
+		file, err := os.ReadFile(filepath)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		nameScores, err := reader(file)
 		if err != nil {
 			log.Fatalln(err)
 		}

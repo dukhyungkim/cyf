@@ -1,9 +1,9 @@
 package main
 
-func readJSON() ([]NameScore, error) {
+func parseJSON(file []byte) ([]NameScore, error) {
 	panic("todo")
 }
 
-func readRepeatedJSON() ([]NameScore, error) {
+func parseRepeatedJSON(file []byte) ([]NameScore, error) {
 	panic("todo")
 }

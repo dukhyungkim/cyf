@@ -1,17 +1,11 @@
 package main
 
 import (
-	"os"
 	"strconv"
 	"strings"
 )
 
-func readCSV(filepath string) ([]NameScore, error) {
-	file, err := os.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
-
+func parseCSV(file []byte) ([]NameScore, error) {
 	contents := string(file)
 	rows := strings.Split(contents, "\n")
 

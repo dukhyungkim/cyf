@@ -2,17 +2,11 @@ package main
 
 import (
 	"encoding/binary"
-	"os"
 	"slices"
 )
 
-func readBinary(filepath string) ([]NameScore, error) {
+func parseBinary(file []byte) ([]NameScore, error) {
 	BigEndian := []byte{0xFE, 0xFF}
-
-	file, err := os.ReadFile(filepath)
-	if err != nil {
-		return nil, err
-	}
 
 	endian := file[:2]
 	if slices.Compare(endian, BigEndian) == 0 {
