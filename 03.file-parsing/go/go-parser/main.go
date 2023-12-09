@@ -13,11 +13,14 @@ type NameScore struct {
 	HighScore int32  `json:"high_score"`
 }
 
+type NameScoreReader func(filepath string) ([]NameScore, error)
+
 func main() {
 	assetDir := path.Clean("../../assets")
-	for filename, reader := range map[string]func(filepath string) ([]NameScore, error){
+	for filename, reader := range map[string]NameScoreReader{
 		"custom-binary-be.bin": readBinary,
 		"custom-binary-le.bin": readBinary,
+		"data.csv":             readCSV,
 	} {
 		filepath := path.Join(assetDir, filename)
 		nameScores, err := reader(filepath)
@@ -25,8 +28,9 @@ func main() {
 			log.Fatalln(err)
 		}
 
-		fmt.Println()
+		fmt.Printf("read %s and results:\n", filename)
 		printResult(nameScores)
+		fmt.Println()
 	}
 }
 
