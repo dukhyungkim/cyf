@@ -18,34 +18,26 @@ func parseBinary(file []byte) ([]NameScore, error) {
 const sizeOfInt32 = 4
 
 func readBE(contents []byte) ([]NameScore, error) {
-	var nameScores []NameScore
-
-	idx := 0
-	for idx != len(contents) {
-		score := int32(binary.BigEndian.Uint32(contents[idx : idx+sizeOfInt32]))
-		idx += sizeOfInt32
-
-		name := parseString(contents[idx:])
-		idx += len(name) + 1
-
-		nameScores = append(nameScores, NameScore{
-			Name:      name,
-			HighScore: score,
-		})
-	}
-
-	return nameScores, nil
+	return readBinaryFunc(contents, func(fourBytes []byte) int32 {
+		return int32(binary.BigEndian.Uint32(fourBytes))
+	})
 }
 
 func readLE(contents []byte) ([]NameScore, error) {
+	return readBinaryFunc(contents, func(fourBytes []byte) int32 {
+		return int32(binary.LittleEndian.Uint32(fourBytes))
+	})
+}
+
+func readBinaryFunc(contents []byte, i32Parser func(fourBytes []byte) int32) ([]NameScore, error) {
 	var nameScores []NameScore
 
 	idx := 0
-	for idx != len(contents) {
-		score := int32(binary.LittleEndian.Uint32(contents[idx : idx+sizeOfInt32]))
+	for idx < len(contents) {
+		score := i32Parser(contents[idx : idx+sizeOfInt32])
 		idx += sizeOfInt32
 
-		name := parseString(contents[idx:])
+		name := bytesToString(contents[idx:])
 		idx += len(name) + 1
 
 		nameScores = append(nameScores, NameScore{
@@ -57,7 +49,7 @@ func readLE(contents []byte) ([]NameScore, error) {
 	return nameScores, nil
 }
 
-func parseString(bytes []byte) string {
+func bytesToString(bytes []byte) string {
 	nullIndex := slices.Index(bytes, 0x00)
 	return string(bytes[:nullIndex])
 }

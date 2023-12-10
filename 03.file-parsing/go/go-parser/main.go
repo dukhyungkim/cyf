@@ -9,11 +9,6 @@ import (
 	"slices"
 )
 
-type NameScore struct {
-	Name      string `json:"name"`
-	HighScore int32  `json:"high_score"`
-}
-
 type NameScoreReader func(file []byte) ([]NameScore, error)
 
 func main() {
@@ -26,13 +21,15 @@ func main() {
 func runApp() error {
 	assetDir := path.Clean("../../assets")
 
-	for filename, reader := range map[string]NameScoreReader{
+	list := map[string]NameScoreReader{
 		"custom-binary-be.bin": parseBinary,
 		"custom-binary-le.bin": parseBinary,
 		"data.csv":             parseCSV,
 		"json.txt":             parseJSON,
 		"repeated-json.txt":    parseRepeatedJSON,
-	} {
+	}
+
+	for filename, reader := range list {
 		filepath := path.Join(assetDir, filename)
 
 		file, err := os.ReadFile(filepath)
@@ -61,5 +58,5 @@ func printResult(nameScores []NameScore) {
 	highest := nameScores[len(nameScores)-1]
 	lowest := nameScores[0]
 	fmt.Printf("highest => name: %s, score: %d\n", highest.Name, highest.HighScore)
-	fmt.Printf("highest => name: %s, score: %d\n", lowest.Name, lowest.HighScore)
+	fmt.Printf("lowest => name: %s, score: %d\n", lowest.Name, lowest.HighScore)
 }
