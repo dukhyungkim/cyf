@@ -3,7 +3,7 @@ use std::mem;
 
 use crate::entity::NameScore;
 
-pub fn parse_binary(file: Vec<u8>) -> Result<Vec<NameScore>, Box<dyn Error>> {
+pub fn parse(file: Vec<u8>) -> Result<Vec<NameScore>, Box<dyn Error>> {
     const BIG_ENDIAN: [u8; 2] = [0xFE, 0xFF];
     let endian = &file[..2];
 

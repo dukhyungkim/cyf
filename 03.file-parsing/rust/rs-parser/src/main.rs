@@ -1,10 +1,10 @@
-use std::fs;
 use std::collections::HashMap;
 use std::error::Error;
+use std::fs;
 use std::path::Path;
 
-use rs_parser::binary::parse_binary;
 use rs_parser::entity::NameScore;
+use rs_parser::parser::Parser;
 
 fn main() {
     run_app().unwrap();
@@ -14,14 +14,15 @@ fn run_app() -> Result<(), Box<dyn Error>> {
     let asset_dir = Path::new("../../assets");
 
     let list = HashMap::from([
-        ("custom-binary-be.bin", parse_binary),
-        ("custom-binary-le.bin", parse_binary),
+        ("custom-binary-be.bin", Parser::BinaryParser),
+        ("custom-binary-le.bin", Parser::BinaryParser),
+        ("data.csv", Parser::CSVParser),
     ]);
-    for (filename, reader) in list {
+    for (filename, parser) in list {
         let filepath = asset_dir.join(filename);
         let file = fs::read(filepath)?;
 
-        let name_scores = reader(file)?;
+        let name_scores = parser.parse(file)?;
 
         println!("read {} and results:", filename);
         print_result(&name_scores);
