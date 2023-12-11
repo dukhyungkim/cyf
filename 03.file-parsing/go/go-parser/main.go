@@ -29,7 +29,7 @@ func runApp() error {
 		"repeated-json.txt":    parseRepeatedJSON,
 	}
 
-	for filename, reader := range list {
+	for filename, parser := range list {
 		filepath := path.Join(assetDir, filename)
 
 		file, err := os.ReadFile(filepath)
@@ -37,7 +37,7 @@ func runApp() error {
 			return err
 		}
 
-		nameScores, err := reader(file)
+		nameScores, err := parser(file)
 		if err != nil {
 			return err
 		}

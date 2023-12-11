@@ -18,10 +18,7 @@ func parseCSV(file []byte) ([]NameScore, error) {
 		}
 
 		score, _ := strconv.Atoi(columns[1])
-		nameScores[i] = NameScore{
-			Name:      columns[0],
-			HighScore: int32(score),
-		}
+		nameScores[i] = NewScore(columns[0], int32(score))
 	}
 	return nameScores, nil
 }
