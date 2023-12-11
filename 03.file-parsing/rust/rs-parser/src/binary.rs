@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::mem;
 
 use crate::entity::NameScore;
 
@@ -8,20 +9,20 @@ pub fn parse_binary(file: Vec<u8>) -> Result<Vec<NameScore>, Box<dyn Error>> {
 
     let contents = file[2..].to_vec();
     if endian == BIG_ENDIAN {
-        parse_big_endian(contents)
+        parse_binary_fn(contents, i32::from_be_bytes)
     } else {
-        parse_little_endian(contents)
+        parse_binary_fn(contents, i32::from_le_bytes)
     }
 }
 
-const SIZE_OF_I32: usize = 4;
+const SIZE_OF_I32: usize = mem::size_of::<i32>();
 
-fn parse_big_endian(contents: Vec<u8>) -> Result<Vec<NameScore>, Box<dyn Error>> {
+fn parse_binary_fn(contents: Vec<u8>, i32_parser: fn([u8; SIZE_OF_I32]) -> i32) -> Result<Vec<NameScore>, Box<dyn Error>> {
     let mut name_scores = Vec::new();
 
     let mut idx = 0;
     while idx < contents.len() {
-        let score = i32::from_be_bytes(contents[idx..idx + SIZE_OF_I32].try_into().unwrap());
+        let score = i32_parser(contents[idx..idx + SIZE_OF_I32].try_into().unwrap());
         idx += SIZE_OF_I32;
 
         let name = bytes_to_string(&contents[idx..])?;
@@ -31,11 +32,6 @@ fn parse_big_endian(contents: Vec<u8>) -> Result<Vec<NameScore>, Box<dyn Error>>
         name_scores.push(ns);
     }
 
-    Ok(name_scores)
-}
-
-fn parse_little_endian(contents: Vec<u8>) -> Result<Vec<NameScore>, Box<dyn Error>> {
-    let name_scores = Vec::new();
     Ok(name_scores)
 }
 

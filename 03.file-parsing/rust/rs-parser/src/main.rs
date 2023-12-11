@@ -15,7 +15,7 @@ fn run_app() -> Result<(), Box<dyn Error>> {
 
     let list = HashMap::from([
         ("custom-binary-be.bin", parse_binary),
-        // ("custom-binary-le.bin", parse_binary),
+        ("custom-binary-le.bin", parse_binary),
     ]);
     for (filename, reader) in list {
         let filepath = asset_dir.join(filename);
