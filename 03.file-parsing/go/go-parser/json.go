@@ -20,10 +20,7 @@ func parseRepeatedJSON(file []byte) ([]NameScore, error) {
 	const comment = byte('#')
 	lines := bytes.Split(file, []byte("\n"))
 	for _, line := range lines {
-		if len(line) == 0 {
-			continue
-		}
-		if line[0] == comment {
+		if len(line) == 0 || line[0] == comment {
 			continue
 		}
 

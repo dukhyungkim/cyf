@@ -13,7 +13,7 @@ func parseCSV(file []byte) ([]NameScore, error) {
 	contents := string(file)
 	rows := strings.Split(contents, "\n")
 
-	dataLen := len(rows) - 2 // wπith Header
+	dataLen := len(rows) - 2 // with Header
 	nameScores := make([]NameScore, 0, dataLen)
 	for _, row := range rows[1:] {
 		columns := strings.Split(row, ",")
