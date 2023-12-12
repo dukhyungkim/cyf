@@ -1,6 +1,7 @@
 use std::cmp::Ordering;
+use serde::Deserialize;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize)]
 pub struct NameScore {
     pub name: String,
     pub high_score: i32,

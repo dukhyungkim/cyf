@@ -17,6 +17,8 @@ fn run_app() -> Result<(), Box<dyn Error>> {
         ("custom-binary-be.bin", Parser::BinaryParser),
         ("custom-binary-le.bin", Parser::BinaryParser),
         ("data.csv", Parser::CSVParser),
+        ("json.txt", Parser::JSONParser),
+        ("repeated-json.txt", Parser::RepeatedJSONParser),
     ]);
     for (filename, parser) in list {
         let filepath = asset_dir.join(filename);
