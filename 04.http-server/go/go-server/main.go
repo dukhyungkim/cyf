@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"html"
 	"io"
@@ -69,6 +70,35 @@ func main() {
 		}
 	})
 
+	http.HandleFunc("/authenticated", func(w http.ResponseWriter, r *http.Request) {
+		authorization := r.Header.Get("Authorization")
+		if authorization == "" {
+			handleError(w, http.StatusUnauthorized)
+			return
+		}
+
+		splitAuth := strings.Split(authorization, " ")
+		if len(splitAuth) != 2 {
+			handleError(w, http.StatusUnauthorized)
+			return
+		}
+
+		decodeAuth, err := base64.StdEncoding.DecodeString(splitAuth[1])
+		if err != nil {
+			handleError(w, http.StatusUnauthorized)
+			return
+		}
+
+		userPass := strings.Split(string(decodeAuth), ":")
+		if len(userPass) != 2 {
+			handleError(w, http.StatusUnauthorized)
+			return
+		}
+
+		result := fmt.Sprintf("<!DOCTYPE html>\n<html>\nHello %s!", userPass[0])
+		w.Write([]byte(result))
+	})
+
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -84,7 +114,9 @@ func parseQueryParams(r *http.Request) (url.Values, error) {
 	return values, nil
 }
 
-func handleError(w http.ResponseWriter, status int, err error) {
+func handleError(w http.ResponseWriter, status int, err ...error) {
 	w.WriteHeader(status)
-	w.Write([]byte(err.Error()))
+	if len(err) > 0 {
+		w.Write([]byte(err[0].Error()))
+	}
 }

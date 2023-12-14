@@ -15,3 +15,9 @@ echo '\n'
 
 curl -i 'http://localhost:8080?foo=<strong>bar</strong>'
 echo '\n'
+
+curl -i 'http://localhost:8080/authenticated'
+echo '\n'
+
+curl -i 'http://localhost:8080/authenticated' -H 'Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ='
+echo '\n'
