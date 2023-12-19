@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -12,7 +13,9 @@ func main() {
 	http.HandleFunc("/", handleRoot())
 	http.HandleFunc("/authenticated", basicAuth(handleAuthenticated()))
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	const addr = "0.0.0.0:8080"
+	fmt.Println("Listening on", addr)
+	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalln(err)
 	}
 }
