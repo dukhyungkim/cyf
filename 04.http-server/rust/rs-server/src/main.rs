@@ -13,7 +13,7 @@ type Result<T> = std::result::Result<T, GenericError>;
 type BoxBody = http_body_util::combinators::BoxBody<Bytes, hyper::Error>;
 
 static INTERNAL_SERVER_ERROR: &[u8] = b"Internal Server Error";
-static NOTFOUND: &[u8] = b"Not Found";
+static NOTFOUND: &[u8] = b"404 page not found";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -37,17 +37,35 @@ async fn main() -> Result<()> {
 async fn handler(req: Request<Incoming>) -> Result<Response<BoxBody>> {
     match (req.method(), req.uri().path()) {
         (&Method::GET, "/") => get_root().await,
-        _ => {
-            Ok(Response::builder()
-                .status(StatusCode::NOT_FOUND)
-                .body(full(NOTFOUND))
-                .unwrap())
-        }
+        (&Method::GET, "/200") => get_ok().await,
+        (&Method::GET, "/404") => get_not_found().await,
+        (&Method::GET, "/500") => get_internal_server_error().await,
+        _ => get_not_found().await,
     }
 }
 
 async fn get_root() -> Result<Response<BoxBody>> {
     Ok(Response::builder().body(full("Hello, World!")).unwrap())
+}
+
+async fn get_ok() -> Result<Response<BoxBody>> {
+    Ok(Response::builder()
+        .status(StatusCode::OK)
+        .body(full(StatusCode::OK.as_str())).unwrap())
+}
+
+async fn get_not_found() -> Result<Response<BoxBody>> {
+    Ok(Response::builder()
+        .status(StatusCode::NOT_FOUND)
+        .body(full(NOTFOUND))
+        .unwrap())
+}
+
+async fn get_internal_server_error() -> Result<Response<BoxBody>> {
+    Ok(Response::builder()
+        .status(StatusCode::INTERNAL_SERVER_ERROR)
+        .body(full(INTERNAL_SERVER_ERROR))
+        .unwrap())
 }
 
 fn full<T: Into<Bytes>>(chunk: T) -> BoxBody {
