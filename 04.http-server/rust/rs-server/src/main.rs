@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use http_body_util::{BodyExt, Full};
-use hyper::{Method, Request, Response, StatusCode};
+use hyper::{header, Method, Request, Response, StatusCode};
 use hyper::body::{Bytes, Incoming};
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
@@ -11,9 +11,6 @@ use tokio::net::TcpListener;
 type GenericError = Box<dyn std::error::Error + Send + Sync>;
 type Result<T> = std::result::Result<T, GenericError>;
 type BoxBody = http_body_util::combinators::BoxBody<Bytes, hyper::Error>;
-
-static INTERNAL_SERVER_ERROR: &[u8] = b"Internal Server Error";
-static NOTFOUND: &[u8] = b"404 page not found";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -44,8 +41,12 @@ async fn handler(req: Request<Incoming>) -> Result<Response<BoxBody>> {
     }
 }
 
+const INDEX: &[u8] = b"<!DOCTYPE html><html><em>Hello, world</em>";
+
 async fn get_root() -> Result<Response<BoxBody>> {
-    Ok(Response::builder().body(full("Hello, World!")).unwrap())
+    Ok(Response::builder()
+        .header(header::CONTENT_TYPE, "text/html")
+        .body(full(INDEX)).unwrap())
 }
 
 async fn get_ok() -> Result<Response<BoxBody>> {
@@ -54,12 +55,16 @@ async fn get_ok() -> Result<Response<BoxBody>> {
         .body(full(StatusCode::OK.as_str())).unwrap())
 }
 
+const NOTFOUND: &[u8] = b"404 page not found";
+
 async fn get_not_found() -> Result<Response<BoxBody>> {
     Ok(Response::builder()
         .status(StatusCode::NOT_FOUND)
         .body(full(NOTFOUND))
         .unwrap())
 }
+
+const INTERNAL_SERVER_ERROR: &[u8] = b"Internal Server Error";
 
 async fn get_internal_server_error() -> Result<Response<BoxBody>> {
     Ok(Response::builder()
