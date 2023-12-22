@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::net::SocketAddr;
 
 use http_body_util::{BodyExt, Full};
@@ -34,7 +35,7 @@ async fn main() -> Result<()> {
 
 async fn handler(req: Request<Incoming>) -> Result<Response<BoxBody>> {
     match (req.method(), req.uri().path()) {
-        (&Method::GET, "/") => get_root().await,
+        (&Method::GET, "/") => get_root(req).await,
         (&Method::POST, "/") => post_root(req).await,
         (&Method::GET, "/200") => get_ok().await,
         (&Method::GET, "/404") => get_not_found().await,
@@ -44,11 +45,32 @@ async fn handler(req: Request<Incoming>) -> Result<Response<BoxBody>> {
 }
 
 const HTML: &[u8] = b"<!DOCTYPE html><html>";
+const HTML_HELLO: &[u8] = b"<!DOCTYPE html><html><em>Hello, world</em>";
 
-async fn get_root() -> Result<Response<BoxBody>> {
+async fn get_root(req: Request<Incoming>) -> Result<Response<BoxBody>> {
+    let query = if let Some(q) = req.uri().query() {
+        q
+    } else {
+        return Ok(Response::builder()
+            .header(header::CONTENT_TYPE, "text/html")
+            .body(full(HTML_HELLO)).unwrap());
+    };
+
+    let params = form_urlencoded::parse(query.as_bytes())
+        .into_owned()
+        .collect::<HashMap<String, String>>();
+
+    let foo = params.get("foo").unwrap();
+    let html_foo = format!("<!DOCTYPE html>
+<html>
+<em>Hello, world</em>
+<p>Query parameters:
+<ul>
+<li>foo: {}</li>
+</ul>", foo);
     Ok(Response::builder()
         .header(header::CONTENT_TYPE, "text/html")
-        .body(full([HTML, b"<em>Hello, world</em>"].concat())).unwrap())
+        .body(full(html_foo)).unwrap())
 }
 
 async fn post_root(req: Request<Incoming>) -> Result<Response<BoxBody>> {
