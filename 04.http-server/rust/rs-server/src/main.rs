@@ -40,10 +40,10 @@ async fn router(req: Request<Incoming>) -> Result<Response<BoxBody>> {
         (&Method::GET, "/") => get_root(req).await,
         (&Method::POST, "/") => post_root(req).await,
         (&Method::GET, "/200") => get_ok().await,
-        (&Method::GET, "/404") => get_not_found().await,
-        (&Method::GET, "/500") => get_internal_server_error().await,
+        (&Method::GET, "/404") => Ok(not_found()),
+        (&Method::GET, "/500") => Ok(internal_server_error()),
         (&Method::GET, "/authenticated") => get_authenticated(req).await,
-        _ => get_not_found().await,
+        _ => Ok(not_found()),
     }
 }
 
@@ -90,23 +90,6 @@ async fn get_ok() -> Result<Response<BoxBody>> {
         .body(full(StatusCode::OK.as_str())).unwrap())
 }
 
-const NOT_FOUND: &[u8] = b"404 page not found";
-
-async fn get_not_found() -> Result<Response<BoxBody>> {
-    Ok(Response::builder()
-        .status(StatusCode::NOT_FOUND)
-        .body(full(NOT_FOUND))
-        .unwrap())
-}
-
-const INTERNAL_SERVER_ERROR: &[u8] = b"Internal Server Error";
-
-async fn get_internal_server_error() -> Result<Response<BoxBody>> {
-    Ok(Response::builder()
-        .status(StatusCode::INTERNAL_SERVER_ERROR)
-        .body(full(INTERNAL_SERVER_ERROR))
-        .unwrap())
-}
 
 async fn get_authenticated(req: Request<Incoming>) -> Result<Response<BoxBody>> {
     const BASIC_PREFIX: &str = "Basic ";
@@ -134,6 +117,20 @@ async fn get_authenticated(req: Request<Incoming>) -> Result<Response<BoxBody>> 
     }
 
     return Ok(un_authorization());
+}
+
+fn not_found() -> Response<BoxBody> {
+    Response::builder()
+        .status(StatusCode::NOT_FOUND)
+        .body(full(b"404 page not found".as_slice()))
+        .unwrap()
+}
+
+fn internal_server_error() -> Response<BoxBody> {
+    Response::builder()
+        .status(StatusCode::INTERNAL_SERVER_ERROR)
+        .body(full(b"Internal Server Error".as_slice()))
+        .unwrap()
 }
 
 fn un_authorization() -> Response<BoxBody> {
