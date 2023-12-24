@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 use std::convert::Infallible;
+use std::env;
 use std::net::SocketAddr;
 
 use base64::Engine;
@@ -90,9 +91,8 @@ async fn get_ok() -> Result<Response<BoxBody>> {
         .body(full(StatusCode::OK.as_str())).unwrap())
 }
 
-
 async fn get_authenticated(req: Request<Incoming>) -> Result<Response<BoxBody>> {
-    const BASIC_PREFIX: &str = "Basic ";
+    const BASIC_PREFIX: &   str = "Basic ";
 
     let auth = if let Some(auth) = req.headers().get("Authorization") {
         auth
@@ -109,7 +109,9 @@ async fn get_authenticated(req: Request<Incoming>) -> Result<Response<BoxBody>> 
         let user_pass: Vec<_> = creeds.split(":").collect();
 
         let username = user_pass[0];
-        if creeds == "username:password" {
+
+        let cred = get_credential();
+        if creeds == cred {
             return Ok(Response::builder()
                 .body(full([HTML, username.as_bytes()].concat()))
                 .unwrap());
@@ -147,4 +149,10 @@ fn empty() -> BoxBody {
 
 fn full<T: Into<Bytes>>(chunk: T) -> BoxBody {
     Full::new(chunk.into()).boxed()
+}
+
+fn get_credential() -> String {
+    let username = env::var("AUTH_USERNAME").unwrap_or("username".to_string());
+    let password = env::var("AUTH_PASSWORD").unwrap_or("password".to_string());
+    format!("{}:{}", username, password)
 }
