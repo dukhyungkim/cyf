@@ -64,3 +64,64 @@ Percentage of the requests served within a certain time (ms)
 ### after rate limit
 
 TODO
+
+## rust
+
+### before late limit
+
+```
+❯ ab -n 10000 -c 100 'http://localhost:8080/'
+This is ApacheBench, Version 2.3 <$Revision: 1903618 $>
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking localhost (be patient)
+Completed 1000 requests
+Completed 2000 requests
+Completed 3000 requests
+Completed 4000 requests
+Completed 5000 requests
+Completed 6000 requests
+Completed 7000 requests
+Completed 8000 requests
+Completed 9000 requests
+Completed 10000 requests
+Finished 10000 requests
+
+
+Server Software:        
+Server Hostname:        localhost
+Server Port:            8080
+
+Document Path:          /
+Document Length:        42 bytes
+
+Concurrency Level:      100
+Time taken for tests:   0.430 seconds
+Complete requests:      10000
+Failed requests:        0
+Total transferred:      1430000 bytes
+HTML transferred:       420000 bytes
+Requests per second:    23242.03 [#/sec] (mean)
+Time per request:       4.303 [ms] (mean)
+Time per request:       0.043 [ms] (mean, across all concurrent requests)
+Transfer rate:          3245.71 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   0.7      2       8
+Processing:     1    2   1.3      2      15
+Waiting:        1    2   1.3      2      14
+Total:          2    4   1.5      4      17
+
+Percentage of the requests served within a certain time (ms)
+  50%      4
+  66%      4
+  75%      4
+  80%      4
+  90%      5
+  95%      6
+  98%     10
+  99%     12
+ 100%     17 (longest request)
+```
