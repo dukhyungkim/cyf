@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/sha256"
 	"crypto/subtle"
+	"golang.org/x/time/rate"
 	"net/http"
 	"os"
 )
@@ -47,5 +48,17 @@ func basicAuth(next http.HandlerFunc) http.HandlerFunc {
 
 		w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	}
+}
+
+func reteLimitMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	var limiter = rate.NewLimiter(100, 30)
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !limiter.Allow() {
+			status := http.StatusTooManyRequests
+			http.Error(w, http.StatusText(status), status)
+			return
+		}
+		next.ServeHTTP(w, r)
 	}
 }
