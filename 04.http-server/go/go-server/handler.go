@@ -91,3 +91,15 @@ func handleAuthenticated() func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(result))
 	}
 }
+
+func handleLimited() func(w http.ResponseWriter, r *http.Request) {
+	status := http.StatusOK
+	if !limiter.Allow() {
+		status = http.StatusTooManyRequests
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(status)
+		_, _ = w.Write([]byte(http.StatusText(status)))
+	}
+}
