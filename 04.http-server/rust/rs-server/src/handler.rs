@@ -54,7 +54,7 @@ pub async fn get_ok() -> types::Result<Response<BoxBody>> {
 }
 
 pub async fn get_authenticated(req: Request<Incoming>) -> types::Result<Response<BoxBody>> {
-    const BASIC_PREFIX: &   str = "Basic ";
+    const BASIC_PREFIX: &str = "Basic ";
 
     let auth = if let Some(auth) = req.headers().get("Authorization") {
         auth
@@ -103,6 +103,12 @@ fn un_authorization() -> Response<BoxBody> {
         .header("WWW-Authenticate", "Basic realm=\"Restricted Area\"")
         .body(empty())
         .unwrap()
+}
+
+pub async fn too_many_requests() -> types::Result<Response<BoxBody>> {
+    Ok(Response::builder()
+        .status(StatusCode::TOO_MANY_REQUESTS)
+        .body(full(StatusCode::TOO_MANY_REQUESTS.as_str())).unwrap())
 }
 
 fn empty() -> BoxBody {
