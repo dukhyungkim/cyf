@@ -2,17 +2,20 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type Image struct {
-	Title   string
-	AltText string
-	URL     string
+	Title   string `json:"title"`
+	AltText string `json:"alt_text"`
+	URL     string `json:"url"`
 }
 
 var (
@@ -36,18 +39,46 @@ func main() {
 
 	r.Get("/images.json", HandleImages)
 
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	const addr = ":8080"
+	fmt.Printf("Listen and serve: %s\n", addr)
+	if err := http.ListenAndServe(addr, r); err != nil {
 		log.Fatalln(err)
 	}
 }
 
 func HandleImages(w http.ResponseWriter, r *http.Request) {
-	bytes, err := json.Marshal(images)
-	if err != nil {
-		_ = render.Render(w, r, ErrRender(err))
-		return
+	indent := r.URL.Query().Get("indent")
+
+	var data []byte
+	if indent != "" {
+		count, err := strconv.Atoi(indent)
+		if err != nil {
+			_ = render.Render(w, r, ErrRender(err))
+			return
+		}
+
+		const space = " "
+		spaces := make([]string, count)
+		for i := 0; i < count; i++ {
+			spaces[i] = space
+		}
+		indentStr := strings.Join(spaces, "")
+
+		data, err = json.MarshalIndent(images, "", indentStr)
+		if err != nil {
+			_ = render.Render(w, r, ErrRender(err))
+			return
+		}
+	} else {
+		var err error
+		data, err = json.Marshal(images)
+		if err != nil {
+			_ = render.Render(w, r, ErrRender(err))
+			return
+		}
 	}
-	_, _ = w.Write(bytes)
+
+	_, _ = w.Write(data)
 }
 
 type ErrResponse struct {
