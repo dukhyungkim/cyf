@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -25,20 +24,19 @@ func main() {
 		}
 	}()
 
-	fetchImages(db)
+	images, err := FetchImages(db)
+	if err != nil {
+		log.Panicln(err)
+	}
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	r.Get("/images.json", HandleImages)
+	r.Get("/images.json", HandleImages(images))
 
 	const addr = ":8080"
 	fmt.Printf("Listen and serve: %s\n", addr)
 	if err = http.ListenAndServe(addr, r); err != nil {
 		log.Fatalln(err)
 	}
-}
-
-func fetchImages(db *sql.DB) ([]Image, error) {
-
 }
