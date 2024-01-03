@@ -53,7 +53,7 @@ func FetchImages(db *sql.DB) ([]Image, error) {
 }
 
 func SaveImage(db *sql.DB, image Image) error {
-	const query = "INSERT INTO public.images(title, url, alt_text) VALUES (?, ?, ?)"
+	const query = "INSERT INTO public.images(title, url, alt_text) VALUES ($1, $2, $3)"
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
