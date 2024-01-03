@@ -24,15 +24,11 @@ func main() {
 		}
 	}()
 
-	images, err := FetchImages(db)
-	if err != nil {
-		log.Panicln(err)
-	}
-
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 
-	r.Get("/images.json", HandleImages(images))
+	r.Get("/images.json", GetImages(db))
+	r.Post("/images.json", PostImage(db))
 
 	const addr = ":8080"
 	fmt.Printf("Listen and serve: %s\n", addr)
