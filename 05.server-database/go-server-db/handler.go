@@ -60,21 +60,21 @@ func PostImage(db *sql.DB) http.HandlerFunc {
 }
 
 func MarshalJSON(data any, indent string) ([]byte, error) {
-	if indent != "" {
-		count, err := strconv.Atoi(indent)
-		if err != nil {
-			return nil, err
-		}
-
-		const space = " "
-		spaces := make([]string, count)
-		for i := 0; i < count; i++ {
-			spaces[i] = space
-		}
-		indentStr := strings.Join(spaces, "")
-
-		return json.MarshalIndent(data, "", indentStr)
+	if indent == "" {
+		return json.Marshal(data)
 	}
 
-	return json.Marshal(data)
+	count, err := strconv.Atoi(indent)
+	if err != nil {
+		return nil, err
+	}
+
+	const space = " "
+	spaces := make([]string, count)
+	for i := 0; i < count; i++ {
+		spaces[i] = space
+	}
+	indentStr := strings.Join(spaces, "")
+
+	return json.MarshalIndent(data, "", indentStr)
 }
