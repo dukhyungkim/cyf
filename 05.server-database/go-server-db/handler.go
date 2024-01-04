@@ -38,11 +38,23 @@ func PostImage(db *sql.DB) http.HandlerFunc {
 		}
 
 		if image.AltText == "" {
-			_ = render.Render(w, r, ErrInternalServerError(errors.New("alt_text cannot be empty")))
+			err := errors.New("alt_text cannot be empty")
+			_ = render.Render(w, r, ErrInvalidRequest(err))
 			return
 		}
 
-		err := SaveImage(db, image)
+		isDup, err := IsDuplicated(db, image)
+		if err != nil {
+			_ = render.Render(w, r, ErrInternalServerError(err))
+			return
+		}
+		if isDup {
+			err = errors.New("duplicate image")
+			_ = render.Render(w, r, ErrInvalidRequest(err))
+			return
+		}
+
+		err = SaveImage(db, image)
 		if err != nil {
 			_ = render.Render(w, r, ErrInternalServerError(err))
 			return

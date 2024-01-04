@@ -25,7 +25,7 @@ func InitDatabase(databaseURL string) (*sql.DB, error) {
 func FetchImages(db *sql.DB) ([]Image, error) {
 	const query = "SELECT title, url, alt_text FROM public.images"
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	rows, err := db.QueryContext(ctx, query)
@@ -55,7 +55,7 @@ func FetchImages(db *sql.DB) ([]Image, error) {
 func SaveImage(db *sql.DB, image Image) error {
 	const query = "INSERT INTO public.images(title, url, alt_text) VALUES ($1, $2, $3)"
 
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	_, err := db.ExecContext(ctx, query, image.Title, image.URL, image.AltText)
@@ -63,4 +63,31 @@ func SaveImage(db *sql.DB, image Image) error {
 		return err
 	}
 	return nil
+}
+
+func CountImage(db *sql.DB, image Image) (int, error) {
+	const query = "SELECT COUNT(*) FROM public.images WHERE title = $1 AND url = $2 AND alt_text = $3"
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	var count int
+	err := db.QueryRowContext(ctx, query, image.Title, image.URL, image.AltText).
+		Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func IsDuplicated(db *sql.DB, image Image) (bool, error) {
+	count, err := CountImage(db, image)
+	if err != nil {
+		return false, err
+	}
+
+	if count == 0 {
+		return false, nil
+	}
+	return true, nil
 }
