@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"github.com/go-chi/render"
 	"net/http"
 	"strconv"
@@ -33,6 +34,11 @@ func PostImage(db *sql.DB) http.HandlerFunc {
 		image := Image{}
 		if err := render.Bind(r, &image); err != nil {
 			_ = render.Render(w, r, ErrInvalidRequest(err))
+			return
+		}
+
+		if image.AltText == "" {
+			_ = render.Render(w, r, ErrInternalServerError(errors.New("alt_text cannot be empty")))
 			return
 		}
 
