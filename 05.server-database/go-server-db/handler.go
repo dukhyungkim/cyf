@@ -37,24 +37,13 @@ func PostImage(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		if image.AltText == "" {
-			err := errors.New("alt_text cannot be empty")
-			_ = render.Render(w, r, ErrInvalidRequest(err))
+		result := VerifyImage(db, image)
+		if result != nil {
+			_ = render.Render(w, r, result)
 			return
 		}
 
-		isDup, err := IsDuplicated(db, image)
-		if err != nil {
-			_ = render.Render(w, r, ErrInternalServerError(err))
-			return
-		}
-		if isDup {
-			err = errors.New("duplicate image")
-			_ = render.Render(w, r, ErrInvalidRequest(err))
-			return
-		}
-
-		err = SaveImage(db, image)
+		err := SaveImage(db, image)
 		if err != nil {
 			_ = render.Render(w, r, ErrInternalServerError(err))
 			return
@@ -69,6 +58,24 @@ func PostImage(db *sql.DB) http.HandlerFunc {
 
 		_, _ = w.Write(data)
 	}
+}
+
+func VerifyImage(db *sql.DB, image Image) render.Renderer {
+	if image.AltText == "" {
+		err := errors.New("alt_text cannot be empty")
+		return ErrInvalidRequest(err)
+	}
+
+	isDup, err := IsDuplicated(db, image)
+	if err != nil {
+		return ErrInternalServerError(err)
+	}
+	if isDup {
+		err = errors.New("duplicate image")
+		return ErrInvalidRequest(err)
+	}
+
+	return nil
 }
 
 func MarshalJSON(data any, indent string) ([]byte, error) {
