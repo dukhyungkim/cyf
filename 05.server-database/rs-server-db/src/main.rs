@@ -1,10 +1,5 @@
-use actix_web::{App, get, HttpResponse, HttpServer, Responder};
-use rs_server_db::image::images;
-
-#[get("/images.json")]
-async fn get_image() -> impl Responder {
-    HttpResponse::Ok().json(images())
-}
+use actix_web::{App, HttpServer};
+use rs_server_db::handler::get_image;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
