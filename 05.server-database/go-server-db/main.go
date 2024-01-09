@@ -6,15 +6,10 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
-	databaseURL := os.Getenv("DATABASE_URL")
-	if databaseURL == "" {
-		databaseURL = "postgres://localhost:5432/server-database"
-	}
-	db, err := InitDatabase(databaseURL)
+	db, err := InitDatabase()
 	if err != nil {
 		log.Fatalln(err)
 	}

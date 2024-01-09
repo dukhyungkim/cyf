@@ -5,10 +5,16 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"os"
 	"time"
 )
 
-func InitDatabase(databaseURL string) (*sql.DB, error) {
+func InitDatabase() (*sql.DB, error) {
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		databaseURL = "postgres://localhost:5432/server-database"
+	}
+
 	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
