@@ -1,6 +1,7 @@
 use actix_web::{get, HttpResponse, Responder, web};
 use serde::{Deserialize, Serialize};
-use crate::image::images;
+use crate::database::Database;
+use crate::image::Image;
 
 #[derive(Debug, Deserialize)]
 struct ImageRequest {
@@ -8,8 +9,8 @@ struct ImageRequest {
 }
 
 #[get("/images.json")]
-pub async fn get_image(info: web::Query<ImageRequest>) -> impl Responder {
-    let images = images();
+pub async fn get_image(info: web::Query<ImageRequest>, db: web::Data<Database>) -> impl Responder {
+    let images: Vec<Image> = db.get_images();
 
     match info.indent {
         Some(indent) => {
