@@ -29,3 +29,9 @@ impl Database {
             .expect("Error loading all images")
     }
 }
+
+impl Default for Database {
+    fn default() -> Self {
+        Self::new()
+    }
+}
