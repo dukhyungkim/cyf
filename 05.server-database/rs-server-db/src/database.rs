@@ -3,7 +3,7 @@ use std::env;
 use diesel::{PgConnection, r2d2, RunQueryDsl};
 use diesel::r2d2::ConnectionManager;
 
-use crate::image::Image;
+use crate::entity;
 use crate::schema::images::dsl::images;
 
 pub type DBPool = r2d2::Pool<ConnectionManager<PgConnection>>;
@@ -23,9 +23,9 @@ impl Database {
         Database { pool }
     }
 
-    pub fn get_images(&self) -> Vec<Image> {
+    pub fn fetch_images(&self) -> Vec<entity::Image> {
         let mut conn = self.pool.get().unwrap();
-        images.load::<Image>(&mut conn)
+        images.load::<entity::Image>(&mut conn)
             .expect("Error loading all images")
     }
 }
