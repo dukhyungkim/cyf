@@ -12,6 +12,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .app_data(web::Data::new(db.clone()))
             .service(handler::get_image)
+            .service(handler::post_image)
     })
         .bind(("0.0.0.0", 8080))?
         .run()

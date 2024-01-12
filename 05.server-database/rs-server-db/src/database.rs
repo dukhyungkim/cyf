@@ -4,7 +4,6 @@ use diesel::{PgConnection, r2d2, RunQueryDsl};
 use diesel::r2d2::ConnectionManager;
 
 use crate::entity;
-use crate::schema::images::dsl::images;
 
 pub type DBPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -24,9 +23,21 @@ impl Database {
     }
 
     pub fn fetch_images(&self) -> Vec<entity::Image> {
+        use crate::schema::images::dsl::images;
+
         let mut conn = self.pool.get().unwrap();
         images.load::<entity::Image>(&mut conn)
             .expect("Error loading all images")
+    }
+
+    pub fn save_image(&self, image: entity::NewImage) {
+        use crate::schema::images::dsl::images;
+
+        let mut conn = self.pool.get().unwrap();
+        diesel::insert_into(images)
+            .values(image)
+            .execute(&mut conn)
+            .expect("Error inserting a new images");
     }
 }
 
