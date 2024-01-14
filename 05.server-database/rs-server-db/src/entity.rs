@@ -9,7 +9,7 @@ pub struct Image {
     pub alt_text: Option<String>,
 }
 
-#[derive(Debug, Insertable)]
+#[derive(Debug, Clone, Insertable)]
 #[diesel(table_name = crate::schema::images)]
 pub struct NewImage {
     pub title: String,
