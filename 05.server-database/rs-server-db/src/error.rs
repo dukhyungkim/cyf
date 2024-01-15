@@ -1,9 +1,10 @@
-use actix_web::{HttpResponse, Responder};
 use actix_web::http::StatusCode;
+use actix_web::HttpResponse;
 use serde::Serialize;
 
 #[derive(Debug, Serialize)]
 pub struct  ErrorResponse {
+    #[serde(skip_serializing)]
     status_code: StatusCode,
     message: String
 }
@@ -18,7 +19,7 @@ impl ErrorResponse {
 }
 
 impl ErrorResponse {
-    pub fn http_response(&self) -> impl Responder {
+    pub fn http_response(&self) -> HttpResponse {
         HttpResponse::build(self.status_code).json(self)
     }
 }

@@ -29,7 +29,7 @@ pub async fn post_image(info: web::Query<dto::ImageRequest>, db: web::Data<Datab
     marshal_json(image, info.indent)
 }
 
-fn marshal_json<T>(item: T, indent: Option<usize>) -> impl Responder
+fn marshal_json<T>(item: T, indent: Option<usize>) -> HttpResponse
     where
         T: Serialize
 {

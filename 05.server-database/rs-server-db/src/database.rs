@@ -1,7 +1,6 @@
 use std::env;
 
-use diesel::{BoolExpressionMethods, ExpressionMethods, Insertable, PgConnection, QueryDsl, r2d2, RunQueryDsl};
-use diesel::dsl::exists;
+use diesel::{BoolExpressionMethods, ExpressionMethods, OptionalExtension, PgConnection, QueryDsl, r2d2, RunQueryDsl};
 use diesel::r2d2::ConnectionManager;
 
 use crate::entity;
@@ -45,15 +44,16 @@ impl Database {
         use crate::schema::images::dsl::*;
 
         let mut conn = self.pool.get().unwrap();
-        images.select(exists(
-            images.filter(
-                title.eq(image.title)
-                    .and(url.eq(image.url))
-                    .and(alt_text.eq(image.alt_text))
-            )
-        ))
-            .get_result(&mut conn)
-            .expect("Error checking if image exists")
+        let duplicated = images.filter(
+            title.eq(image.title)
+                .and(url.eq(image.url))
+                .and(alt_text.eq(image.alt_text))
+        )
+            .first::<entity::Image>(&mut conn)
+            .optional()
+            .expect("Error checking if image exists");
+
+        duplicated.is_some()
     }
 }
 
