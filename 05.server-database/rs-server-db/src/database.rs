@@ -40,14 +40,14 @@ impl Database {
             .expect("Error inserting a new image");
     }
 
-    pub fn is_duplicated_image(&self, image: entity::NewImage) -> bool {
+    pub fn is_duplicated_image(&self, image: &entity::NewImage) -> bool {
         use crate::schema::images::dsl::*;
 
         let mut conn = self.pool.get().unwrap();
         let duplicated = images.filter(
-            title.eq(image.title)
-                .and(url.eq(image.url))
-                .and(alt_text.eq(image.alt_text))
+            title.eq(&image.title)
+                .and(url.eq(&image.url))
+                .and(alt_text.eq(&image.alt_text))
         )
             .first::<entity::Image>(&mut conn)
             .optional()
