@@ -13,7 +13,14 @@ impl ErrorResponse {
     pub fn duplicate_error() -> Self {
         Self {
             status_code: StatusCode::BAD_REQUEST,
-            message: "duplicated".to_string(),
+            message: "duplicated image".to_string(),
+        }
+    }
+
+    pub fn invalid_alt_text() -> Self {
+        Self {
+            status_code: StatusCode::BAD_REQUEST,
+            message: "invalid alt_text".to_string(),
         }
     }
 }

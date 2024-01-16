@@ -11,7 +11,7 @@ pub async fn get_image(info: web::Query<dto::ImageRequest>, db: web::Data<Databa
     let images: Vec<_> = db.fetch_images()
         .iter()
         .cloned()
-        .map(|img| dto::Image::from(img))
+        .map(dto::Image::from)
         .collect();
 
     marshal_json(images, info.indent)
@@ -34,6 +34,17 @@ fn verify_image(db: &Data<Database>, image: &entity::NewImage) -> Result<(), Err
     if db.is_duplicated_image(image) {
         return Err(ErrorResponse::duplicate_error());
     }
+
+    let alt_text = &image.alt_text;
+    match alt_text {
+        Some(alt_text) => {
+            if alt_text.is_empty() {
+                return Err(ErrorResponse::invalid_alt_text())
+            }
+        }
+        None => return Err(ErrorResponse::invalid_alt_text())
+    }
+
     Ok(())
 }
 
