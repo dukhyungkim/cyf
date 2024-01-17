@@ -1,10 +1,8 @@
 use actix_web::{get, HttpResponse, post, Responder, web};
-use actix_web::web::Data;
 use serde::Serialize;
 
-use crate::{dto, entity};
+use crate::{dto, entity, verifier};
 use crate::database::Database;
-use crate::error::ErrorResponse;
 
 #[get("/images.json")]
 pub async fn get_image(info: web::Query<dto::ImageRequest>, db: web::Data<Database>) -> impl Responder {
@@ -22,30 +20,12 @@ pub async fn post_image(info: web::Query<dto::ImageRequest>, db: web::Data<Datab
     let image = payload.0;
     let new_image: entity::NewImage = image.clone().into();
 
-    if let Err(err) = verify_image(&db, &new_image) {
+    if let Err(err) = verifier::verify_image(&db, &new_image).await {
         return err.http_response();
     }
 
     db.save_image(new_image);
     marshal_json(image, info.indent)
-}
-
-fn verify_image(db: &Data<Database>, image: &entity::NewImage) -> Result<(), ErrorResponse> {
-    if db.is_duplicated_image(image) {
-        return Err(ErrorResponse::duplicate_error());
-    }
-
-    let alt_text = &image.alt_text;
-    match alt_text {
-        Some(alt_text) => {
-            if alt_text.is_empty() {
-                return Err(ErrorResponse::invalid_alt_text())
-            }
-        }
-        None => return Err(ErrorResponse::invalid_alt_text())
-    }
-
-    Ok(())
 }
 
 fn marshal_json<T>(item: T, indent: Option<usize>) -> HttpResponse
